@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZapGas - Automação p/ Gás e Água</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+    :root {
+        --bg: #0c152a; /* Deep dark blue */
+        --card-bg: rgba(255, 255, 255, 0.05);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --accent: #0072FF; /* Blue */
+        --accent-glow: rgba(0, 114, 255, 0.3);
+        --primary: #0072FF;
+        --text: #f3f4f6;
+        --text-dim: #9ca3af;
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    body { 
+        font-family: 'Outfit', sans-serif; 
+        background-color: var(--bg); 
+        margin: 0; 
+        padding: 0; 
+        color: var(--text); 
+        min-height: 100vh;
+    }
+
+    .glass {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+    }
+
+    .container { max-width: 1200px; margin: auto; padding: 40px 15px; }
+
+    .navbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        padding: 20px;
+    }
+
+    .logo { 
+        font-size: 28px; 
+        font-weight: 800; 
+        display: flex; 
+        align-items: center; 
+        gap: 12px;
+        background: linear-gradient(135deg, #fff 0%, #88a4e6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .logo i { -webkit-text-fill-color: var(--accent); }
+
+    .nav-buttons { display: flex; gap: 15px; }
+
+    button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+    }
+
+    button:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 20px var(--accent-glow);
+        filter: brightness(1.1);
+    }
+
+    .btn-outline {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--card-border);
+        color: var(--text);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+    .card { padding: 30px; margin-bottom: 30px; }
+    h2 { font-size: 22px; margin-top: 0; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; color: var(--accent); }
+
+    label { font-size: 14px; font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-dim); }
+    
+    input[type="text"], input[type="number"], input[type="password"], textarea, select {
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--card-border);
+        padding: 14px;
+        border-radius: 12px;
+        color: white;
+        font-family: inherit;
+        font-size: 15px;
+        margin-bottom: 20px;
+        transition: border-color 0.3s;
+    }
+    
+    input[type="checkbox"] {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+    }
+    
+    input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, textarea:focus, select:focus { 
+        border-color: var(--accent); outline: none; background: rgba(0,0,0,0.4); 
+    }
+
+    .grid-form { display: grid; grid-template-columns: 1fr; gap: 15px; }
+    @media (min-width: 768px) {
+        .grid-form { grid-template-columns: 1fr 1fr; }
+    }
+
+    .client-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .client-card {
+        padding: 20px;
+        transition: all 0.3s;
+        border: 1px solid var(--card-border);
+    }
+    .client-card:hover { border-color: var(--accent); }
+    
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+    .actions-row { 
+        display: flex; 
+        gap: 8px; 
+        margin-top: 15px; 
+        flex-wrap: wrap; 
+        align-items: center;
+    }
+    .btn-icon { 
+        padding: 8px; 
+        border-radius: 8px; 
+        flex-shrink: 0;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Estilo Marcas na mesma linha */
+    .brand-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 15px;
+        background: rgba(0,0,0,0.1);
+        padding: 10px;
+        border-radius: 8px;
+    }
+    @media (min-width: 768px) {
+        .brand-row {
+            flex-direction: row;
+            align-items: center;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            margin-bottom: 8px;
+        }
+    }
+    .brand-row input[type="text"] { flex: 2; margin-bottom: 0; }
+    .brand-row input[type="number"] { flex: 1; margin-bottom: 0; }
+    .brand-row .btn-icon { margin-bottom: 0; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+
+    .welcome-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    @media (min-width: 768px) {
+        .welcome-group { grid-template-columns: repeat(3, 1fr); }
+    }
+    .welcome-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid var(--card-border); }
+
+    .modal-overlay {
+        position: fixed;
+        top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        width: 100%;
+        max-width: 500px;
+        padding: 30px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="navbar glass">
+        <div class="logo">
+            <i class="ph-fill ph-gas-can" style="color: var(--accent);"></i>
+            ZapGas<span> Automação</span>
+        </div>
+        <div class="nav-buttons">
+            <button id="btnViewList" onclick="toggleView('list')">
+                <i class="ph ph-squares-four"></i> Painel
+            </button>
+            <button id="btnViewForm" class="btn-outline" onclick="toggleView('form')">
+                <i class="ph ph-plus-circle"></i> Criar Bot
+            </button>
+        </div>
+    </div>
+
+    <!-- TELA: LISTA DE CLIENTES -->
+    <div id="viewList">
+        <div style="margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
+            <h2 style="margin:0;"><i class="ph ph-users"></i> Gestão de Bots</h2>
+            <span class="glass" style="padding: 5px 15px; font-size: 14px; font-weight: 600; color: var(--accent);">
+                Total: <span id="count">0</span>
+            </span>
+        </div>
+        <div id="clientList" class="client-grid">
+            <!-- Preenchido via JS -->
+        </div>
+    </div>
+
+    <!-- TELA: CRIAR CLIENTE -->
+    <div id="viewForm" class="hidden">
+        <form id="addClientForm">
+            <div class="card glass">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 25px;">
+                    <h2 style="margin:0;"><i class="ph ph-buildings"></i> 1. Identidade da Empresa</h2>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-sm btn-outline" onclick="exportConfigForm()" title="Baixar configuração atual da tela"><i class="ph ph-download-simple"></i> Salvar (Backup)</button>
+                        <button type="button" class="btn-sm btn-outline" onclick="document.getElementById('importFile').click()" title="Restaurar de arquivo .json"><i class="ph ph-upload-simple"></i> Restaurar (Backup)</button>
+                        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importDataFile(event)">
+                    </div>
+                </div>
+                
+                <div class="grid-form">
+                    <div>
+                        <label>ID da Sessão (Ex: loja_central):</label>
+                        <input type="text" id="clientId" placeholder="unica_url_empresa" required>
+                    </div>
+                    <div>
+                        <label>Nome Comercial:</label>
+                        <input type="text" id="companyName" placeholder="Ex: Toca Conveniência" required>
+                    </div>
+                </div>
+
+                <div class="grid-form">
+                    <div>
+                        <label>Login de Acesso:</label>
+                        <input type="text" id="clientLogin" placeholder="usuario_admin" required>
+                    </div>
+                    <div>
+                        <label>Senha Segura:</label>
+                        <input type="text" id="clientPassword" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <label>WhatsApp Destino (DDD + Número):</label>
+                <input type="text" id="attendantPhone" placeholder="5511999999999" required value="5518981014240">
+
+                <label>Sequência de Boas-Vindas (3 Mensagens Opcionais):</label>
+                <div class="welcome-group">
+                    <div class="welcome-box">
+                        <label style="color: var(--accent);">Mensagem 1</label>
+                        <textarea id="welcome1" rows="3" placeholder="Olá 👋&#10;Bem-vindo à {nome_empresa}"></textarea>
+                    </div>
+                    <div class="welcome-box">
+                        <label style="color: var(--accent);">Mensagem 2</label>
+                        <textarea id="welcome2" rows="3" placeholder="🚚 Trabalhamos com gás, água, gelo e conveniência, com entrega rápida."></textarea>
+                    </div>
+                    <div class="welcome-box">
+                        <label style="color: var(--accent);">Mensagem 3 (Ignorado)</label>
+                        <textarea id="welcome3" rows="3" placeholder="(Não é mais utilizado por padrão, deixe em branco)"></textarea>
+                    </div>
+                </div>
+
+                <div class="glass" style="padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2);">
+                    <div class="grid-form">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <label style="margin:0;">Horário Comercial</label>
+                                <input type="checkbox" id="useOperatingHours" style="width: auto;" onchange="document.getElementById('weeklySchedule').classList.toggle('hidden', !this.checked); document.getElementById('msgClosed').disabled = !this.checked">
+                            </div>
+                            <!-- Schedule Grid -->
+                            <div id="weeklySchedule" class="hidden" style="margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                                <div style="display:flex; gap:5px; align-items:center; margin-bottom:8px;">
+                                    <span style="width:60px; font-size:13px; font-weight:600;">Seg-Sex</span>
+                                    <input type="time" id="timeSegSexStart" style="padding:6px; margin:0;" value="08:00">
+                                    <span style="font-size:12px;">às</span>
+                                    <input type="time" id="timeSegSexEnd" style="padding:6px; margin:0;" value="18:00">
+                                </div>
+                                <div style="display:flex; gap:5px; align-items:center; margin-bottom:8px;">
+                                    <label style="width:60px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; margin:0;"><input type="checkbox" id="openSab" checked onchange="document.getElementById('timeSabStart').disabled = !this.checked; document.getElementById('timeSabEnd').disabled = !this.checked"> Sáb</label>
+                                    <input type="time" id="timeSabStart" style="padding:6px; margin:0;" value="08:00">
+                                    <span style="font-size:12px;">às</span>
+                                    <input type="time" id="timeSabEnd" style="padding:6px; margin:0;" value="12:00">
+                                </div>
+                                <div style="display:flex; gap:5px; align-items:center;">
+                                    <label style="width:60px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px; margin:0;"><input type="checkbox" id="openDom" onchange="document.getElementById('timeDomStart').disabled = !this.checked; document.getElementById('timeDomEnd').disabled = !this.checked"> Dom</label>
+                                    <input type="time" id="timeDomStart" style="padding:6px; margin:0;" value="08:00" disabled>
+                                    <span style="font-size:12px;">às</span>
+                                    <input type="time" id="timeDomEnd" style="padding:6px; margin:0;" value="12:00" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Mensagem Fechado (3 Linhas):</label>
+                            <textarea id="msgClosed" rows="3" placeholder="Desculpe, estamos fechados..." disabled></textarea>
+                        </div>
+                    </div>
+
+                    <div class="grid-form" style="margin-top:10px;">
+                        <div>
+                            <label>Taxa de Entrega Padrão (R$)</label>
+                            <input type="number" step="0.01" id="deliveryFeeValue" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label>Pedido Mínimo p/ Frete Grátis (R$)</label>
+                            <input type="number" step="0.01" id="minOrder" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <!-- Bairros Dinâmicos -->
+                    <div style="margin-top:10px; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+                        <label style="display:flex; justify-content:space-between;">
+                            <span>Taxas Específicas por Bairro</span>
+                        </label>
+                        <p style="font-size:12px; color:var(--text-dim); margin-top:0;">Se o bairro for reconhecido na mensagem, essa taxa substituirá a taxa padrão.</p>
+                        <div id="neighborhoodsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+                        <button type="button" class="btn-sm btn-outline" style="width:100%; margin-top:10px; padding:8px;" onclick="addNeighborhood()">
+                            <i class="ph ph-plus"></i> Adicionar Região/Bairro
+                        </button>
+                    </div>
+                    
+                        <label style="margin:0; font-weight:normal; display:flex; align-items:center; cursor:pointer;">
+                            <input type="checkbox" id="deliveryFeeAdd" style="width:auto; margin-right:8px;"> Somar taxa no total?
+                        </label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <label style="margin:0; font-weight:normal; display:flex; align-items:center; cursor:pointer;">
+                                <input type="checkbox" id="useAutoRecall" style="width:auto; margin-right:8px;" onchange="document.getElementById('recallDays').disabled = !this.checked"> Ativar Retargeting (Recompra)
+                            </label>
+                            <input type="number" id="recallDays" placeholder="Dias (ex: 15)" style="width:120px; margin:0;" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass">
+                    <h2><i class="ph ph-package"></i> 2. Catálogo de Produtos</h2>
+                <div id="productsContainer"></div>
+                <button type="button" class="btn-outline" style="width:100%;" onclick="addProduct()">
+                    <i class="ph ph-plus"></i> Adicionar Novo Produto
+                </button>
+            </div>
+
+            <div class="card glass">
+                <h2><i class="ph ph-credit-card"></i> 3. Checkout e Mensagem Final</h2>
+                
+                <label>Métodos Aceitos:</label>
+                <div id="paymentChecks" style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+                    <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Dinheiro" checked> Dinheiro</label>
+                    <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Pix" checked> Pix</label>
+                    <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Cartão"> Cartão</label>
+                    <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Cartão na Entrega" checked> Cartão na Entrega</label>
+                    <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Link de Pagamento"> Link de Pagamento</label>
+                </div>
+
+                <label>Template de Confirmação Final:</label>
+                <textarea id="finalMessage" rows="16">🧾 Pedido #{numero_pedido} confirmado!
+
+📦 Seu pedido
+
+{itens}
+💰 Subtotal: R${subtotal}
+{taxa_entrega}
+💵 Total: R${total}
+
+💳 Pagamento: {pagamento}
+
+📍 Entrega:
+{endereco}
+
+🚚 Previsão de entrega:
+{tempo_entrega}
+
+🙏 Obrigado por comprar com a {nome_empresa}!
+
+Seu pedido já foi enviado para nossa equipe.
+
+Em breve sairá para entrega 🚚</textarea>
+
+                <br><br>
+                <label>Mensagem de Finalização / Agradecimento (3 Linhas):</label>
+                <textarea id="closingMessage" rows="3" placeholder="Obrigado pela preferência! Volte sempre. ❤️"></textarea>
+            </div>
+
+            <button type="submit" style="width:100%; padding: 20px; font-size: 18px; border-radius: 15px; background: var(--accent); color: var(--bg);">
+                <i class="ph ph-rocket-launch"></i> Publicar Robô ZapGas
+            </button>
+            <br><br>
+        </form>
+    </div>
+
+    <!-- MODAL LINKS -->
+    <div id="linksModal" class="modal-overlay hidden" onclick="if(event.target === this) closeModal()">
+        <div class="modal-content glass">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2 id="modalTitle" style="margin:0;">Acesso Rápido</h2>
+                <button type="button" class="btn-sm btn-outline btn-icon" style="padding:5px;" onclick="closeModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <p id="modalBody" style="font-size: 14px; line-height: 1.6; color: var(--text-dim); margin-bottom: 20px;"></p>
+            <textarea id="copyHelper" style="height: 100px; font-size: 13px; margin-bottom: 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--accent); color: #fff; width: 100%; border-radius: 10px; padding: 10px;" readonly></textarea>
+            <button type="button" onclick="closeModal()" style="width:100%; padding: 15px; font-size: 16px;">Fechar Janela</button>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    let clientProducts = [];
+    let clientNeighborhoods = [];
+    let editingClientId = null; // To keep track of the client being edited
+
+    function toggleView(view) {
+        document.getElementById('viewList').classList.toggle('hidden', view === 'form');
+        document.getElementById('viewForm').classList.toggle('hidden', view === 'list');
+        document.getElementById('btnViewList').className = view === 'list' ? '' : 'btn-outline';
+        document.getElementById('btnViewForm').className = view === 'form' ? '' : 'btn-outline';
+        if(view === 'list') {
+            fetchClients(); // Recarrega os dados ao voltar pra lista
+            editingClientId = null; // Reset editing state
+            document.getElementById('addClientForm').reset(); // Clear form
+            document.getElementById('clientId').disabled = false; // Enable ID field for new client
+            clientProducts = [
+                { name: 'Gás', synonyms: ['botijao', 'gas de cozinha'], brands: [{name:'Ultragaz', price:'110.00'}] },
+                { name: 'Água', synonyms: ['agua mineral', 'galao', 'galao 20l', 'agua 20l'], brands: [{name:'Crystal', price:'15.00'}] }
+            ];
+            renderProducts();
+            // Reset welcome messages
+            document.getElementById('welcome1').value = '';
+            document.getElementById('welcome2').value = '';
+            document.getElementById('welcome3').value = '';
+            document.getElementById('closingMessage').value = '';
+            
+            // Reset operating hours and delivery fee toggles
+            document.getElementById('useOperatingHours').checked = false;
+            document.getElementById('weeklySchedule').classList.add('hidden');
+            
+            document.getElementById('timeSegSexStart').value = '08:00';
+            document.getElementById('timeSegSexEnd').value = '18:00';
+            document.getElementById('openSab').checked = true;
+            document.getElementById('timeSabStart').value = '08:00';
+            document.getElementById('timeSabEnd').value = '12:00';
+            document.getElementById('openDom').checked = false;
+            document.getElementById('timeDomStart').value = '08:00';
+            document.getElementById('timeDomEnd').value = '12:00';
+
+            document.getElementById('msgClosed').disabled = true;
+            document.getElementById('msgClosed').value = '';
+            document.getElementById('deliveryFeeValue').value = '';
+            document.getElementById('minOrder').value = '';
+            document.getElementById('deliveryFeeAdd').checked = false;
+            document.getElementById('useAutoRecall').checked = false;
+            
+            clientNeighborhoods = [];
+            renderNeighborhoods();
+            // Reset payment methods
+            document.querySelectorAll('#paymentChecks input').forEach(input => {
+                input.checked = (input.value === 'Dinheiro' || input.value === 'Pix' || input.value === 'Cartão na Entrega');
+            });
+        }
+    }
+
+    // --- PRODUTOS & MARCAS BUILDER ---
+    function renderProducts() {
+        const c = document.getElementById('productsContainer');
+        c.innerHTML = '';
+        clientProducts.forEach((p, pIndex) => {
+            let html = `
+                <div class="product-box glass">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                        <h3 style="margin:0; font-size:16px;"><i class="ph ph-tag"></i> Produto #${pIndex + 1}</h3>
+                        <button type="button" class="btn-sm btn-danger btn-icon" onclick="removeProduct(${pIndex})"><i class="ph ph-trash"></i></button>
+                    </div>
+                    
+                    <label>Nome do Produto:</label>
+                    <input type="text" placeholder="Ex: Água, Gás" value="${p.name}" oninput="updateProduct(${pIndex}, 'name', this.value)" required>
+                    
+                    <label>Sinônimos (separados por vírgula):</label>
+                    <input type="text" placeholder="Ex: agua mineral, galao, aguao" value="${p.synonyms ? p.synonyms.join(', ') : ''}" oninput="updateProductSynonyms(${pIndex}, this.value)">
+
+                    <label>Link da Imagem da Categoria:</label>
+                    <input type="text" placeholder="https://exemplo.com/imagem.png" value="${p.image || ''}" oninput="updateProduct(${pIndex}, 'image', this.value)">
+                    
+                    <label style="color:var(--accent); font-size:13px; margin-bottom:10px;">Variações (Mesma Linha):</label>
+                    <div id="brands-${pIndex}">
+            `;
+            
+            p.brands.forEach((b, bIndex) => {
+                html += `
+                    <div class="brand-row" style="flex-wrap:wrap; background:rgba(0,0,0,0.1); padding:10px; border-radius:8px; margin-bottom:10px;">
+                        <input type="text" placeholder="Nome (Ex: Ultragaz)" value="${b.name}" oninput="updateBrand(${pIndex}, ${bIndex}, 'name', this.value)" required style="flex:2; margin-bottom:5px;">
+                        <input type="number" step="0.01" placeholder="Preço" value="${b.price}" oninput="updateBrand(${pIndex}, ${bIndex}, 'price', this.value)" required style="flex:1; margin-bottom:5px;">
+                        <input type="text" placeholder="URL da Imagem" value="${b.image || ''}" oninput="updateBrand(${pIndex}, ${bIndex}, 'image', this.value)" style="width:100%; margin-bottom:5px;">
+                        <button type="button" class="btn-sm btn-danger btn-icon" onclick="removeBrand(${pIndex}, ${bIndex})"><i class="ph ph-trash"></i></button>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <button type="button" class="btn-outline" style="margin-top:10px; width:100%;" onclick="addBrand(${pIndex})"><i class="ph ph-plus"></i> Adicionar Variação</button>
+                </div>
+            `;
+            c.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    function addProduct() {
+        if(clientProducts.length >= 10) return alert('Máximo de 10 produtos permitidos.');
+        clientProducts.push({ name: '', synonyms: [], brands: [] });
+        renderProducts();
+    }
+    function updateProduct(pIdx, field, val) { clientProducts[pIdx][field] = val; }
+    function updateProductSynonyms(pIdx, val) { 
+        clientProducts[pIdx].synonyms = val.split(',').map(s => s.trim()).filter(s => s);
+    }
+    function removeProduct(pIdx) { clientProducts.splice(pIdx, 1); renderProducts(); }
+    
+    function addBrand(pIdx) { clientProducts[pIdx].brands.push({ name: '', price: '' }); renderProducts(); }
+    function updateBrand(pIdx, bIdx, field, val) { clientProducts[pIdx].brands[bIdx][field] = val; }
+    function removeBrand(pIdx, bIdx) { clientProducts[pIdx].brands.splice(bIdx, 1); renderProducts(); }
+
+    // Inicializa com Água e Gás de exemplo
+    clientProducts = [
+        { name: 'Gás', synonyms: ['botijao', 'gas de cozinha'], brands: [{name:'Ultragaz', price:'110.00'}] },
+        { name: 'Água', synonyms: ['agua mineral', 'galao', 'galao 20l', 'agua 20l'], brands: [{name:'Crystal', price:'15.00'}] }
+    ];
+    renderProducts();
+
+    // --- BAIRROS BUILDER ---
+    function renderNeighborhoods() {
+        const c = document.getElementById('neighborhoodsContainer');
+        c.innerHTML = '';
+        clientNeighborhoods.forEach((n, idx) => {
+            const html = `
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="text" placeholder="Nome do Bairro" value="${n.name}" oninput="clientNeighborhoods[${idx}].name = this.value" style="padding:8px; margin:0; flex:2;" required>
+                    <input type="number" step="0.01" placeholder="R$ Taxa" value="${n.fee}" oninput="clientNeighborhoods[${idx}].fee = this.value" style="padding:8px; margin:0; flex:1;" required>
+                    <button type="button" class="btn-sm btn-danger btn-icon" onclick="removeNeighborhood(${idx})" style="padding:8px; margin:0;"><i class="ph ph-trash"></i></button>
+                </div>
+            `;
+            c.insertAdjacentHTML('beforeend', html);
+        });
+    }
+    function addNeighborhood() {
+        if(clientNeighborhoods.length >= 20) return alert('Máximo de 20 bairros.');
+        clientNeighborhoods.push({ name: '', fee: '' });
+        renderNeighborhoods();
+    }
+    function removeNeighborhood(idx) { clientNeighborhoods.splice(idx, 1); renderNeighborhoods(); }
+
+    function getFormPayload() {
+        // Pega as boxes de pagamento marcadas
+        const pays = [];
+        document.querySelectorAll('#paymentChecks input:checked').forEach(cb => pays.push(cb.value));
+
+        const welcomeMessages = [
+            document.getElementById('welcome1').value,
+            document.getElementById('welcome2').value,
+            document.getElementById('welcome3').value
+        ].filter(m => m.trim() !== '');
+
+        return {
+            id: document.getElementById('clientId').value.trim(),
+            login: document.getElementById('clientLogin').value.trim(),
+            password: document.getElementById('clientPassword').value.trim(),
+            companyInfo: {
+                name: document.getElementById('companyName').value,
+                welcomeMessages: welcomeMessages,
+                deliveryTime: 'breve', 
+                operatingHoursAdvanced: document.getElementById('useOperatingHours').checked ? {
+                    segsex: { start: document.getElementById('timeSegSexStart').value, end: document.getElementById('timeSegSexEnd').value },
+                    sab: { open: document.getElementById('openSab').checked, start: document.getElementById('timeSabStart').value, end: document.getElementById('timeSabEnd').value },
+                    dom: { open: document.getElementById('openDom').checked, start: document.getElementById('timeDomStart').value, end: document.getElementById('timeDomEnd').value }
+                } : null,
+                msgClosed: document.getElementById('msgClosed').value,
+                deliveryFee: parseFloat(document.getElementById('deliveryFeeValue').value) || 0,
+                neighborhoods: JSON.parse(JSON.stringify(clientNeighborhoods)),
+                deliveryFeeAdd: document.getElementById('deliveryFeeAdd').checked,
+                minOrder: parseFloat(document.getElementById('minOrder').value) || 0,
+                useAutoRecall: document.getElementById('useAutoRecall').checked,
+                recallDays: document.getElementById('recallDays').value,
+                msgInRoute: document.getElementById('msgInRoute').value,
+                msgDelivered: document.getElementById('msgDelivered').value,
+                closingMessage: document.getElementById('closingMessage').value
+            },
+            attendantPhone: document.getElementById('attendantPhone').value.trim(),
+            products: JSON.parse(JSON.stringify(clientProducts)), // Deep copy to prevent ref issues
+            paymentMethods: pays,
+            finalMessage: document.getElementById('finalMessage').value
+        };
+    }
+
+    // --- FORMULÁRIO DE CADASTRO SUBMIT ---
+    document.getElementById('addClientForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = getFormPayload();
+
+        try {
+            const method = editingClientId ? 'PUT' : 'POST';
+            const url = editingClientId ? `/api/clients/${editingClientId}` : '/api/clients';
+
+            await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            alert('Distribuidora salva com sucesso! O robô já pode ser ligado.');
+            toggleView('list');
+            document.getElementById('addClientForm').reset();
+            clientProducts = []; renderProducts();
+        } catch(err) { alert('Erro ao salvar'); console.error(err); }
+    });
+
+    // --- WEBSOCKET E LISTA ---
+    socket.on('statusUpdate', (data) => {
+        const badge = document.getElementById(`status-${data.clientId}`);
+        if(badge) {
+            badge.innerText = data.status;
+            if(data.status.includes('Conectado')) {
+                badge.style.background = 'rgba(72, 187, 120, 0.2)';
+                badge.style.color = '#48bb78';
+            } else if(data.status.includes('Desconectado')) {
+                badge.style.background = 'rgba(229, 62, 62, 0.2)';
+                badge.style.color = '#e53e3e';
+            } else {
+                badge.style.background = 'rgba(255,255,255,0.05)';
+                badge.style.color = 'var(--text-dim)';
+            }
+        }
+    });
+
+    async function fetchClients() {
+        const res = await fetch('/api/clients');
+        const data = await res.json();
+        const list = document.getElementById('clientList');
+        document.getElementById('count').innerText = Object.keys(data).length;
+        
+        list.innerHTML = '';
+        if(Object.keys(data).length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:var(--text-dim);">Nenhum cliente cadastrado. Clique em "Criar Bot" para começar!</p>';
+            return;
+        }
+
+        for (const id in data) {
+            const c = data[id];
+            const item = document.createElement('div');
+            item.className = 'client-card glass';
+            item.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                    <h3 style="margin:0;">${c.companyInfo?.name || id}</h3>
+                    <div class="status-badge" id="status-${id}" style="background: rgba(255,255,255,0.05); color: var(--text-dim); margin-bottom:0;">${c.status}</div>
+                </div>
+                <p style="font-size: 13px; color: var(--text-dim); margin:5px 0;"><i class="ph ph-identification-card"></i> ID: ${id}</p>
+                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; font-size: 12px; margin: 10px 0;">
+                    <i class="ph ph-key"></i> ${c.login} / ${c.password}
+                </div>
+                <div class="actions-row">
+                    <button class="btn-sm" style="flex:2; padding: 12px; font-size: 14px;" onclick="action('${id}', 'start', this)"><i class="ph ph-play"></i> Ligar Robô</button>
+                    <button class="btn-sm btn-outline" style="color: #48bb78; border-color: #48bb78; padding: 10px;" title="Ver QR Code" onclick="window.open('/client.html?id=${id}', '_blank')"><i class="ph ph-qr-code"></i> QR Code</button>
+                    <button class="btn-sm btn-outline" style="border-color: #e53e3e; color: #e53e3e; padding: 10px;" title="Parar" onclick="action('${id}', 'stop', this)"><i class="ph ph-stop"></i> Parar</button>
+                    <button class="btn-sm btn-outline" title="Editar" style="padding: 10px;" onclick="editClient('${id}')"><i class="ph ph-pencil"></i></button>
+                    <button class="btn-sm btn-outline" title="Download Backup" style="padding: 10px;" onclick="exportData('${id}')"><i class="ph ph-download-simple"></i> Download</button>
+                    <button class="btn-sm" style="background: #F59E0B; padding: 10px; color: white;" title="Dashboard" onclick="window.open('/dashboard.html?clientId=${id}', '_blank')"><i class="ph ph-graph"></i> Dashboard</button>
+                    <button class="btn-sm" style="background: #10b981; padding: 10px; color: white;" title="Ver Loja" onclick="window.open('/pedido.html?id=${id}', '_blank')"><i class="ph ph-shopping-bag"></i> Loja</button>
+                    <button class="btn-sm btn-danger" style="padding: 10px;" onclick="deletar('${id}')"><i class="ph ph-trash"></i> Excluir</button>
+                </div>
+            `;
+            list.appendChild(item);
+        }
+    }
+
+    async function action(id, type, btn) {
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ph ph-circle-notch ph-spin"></i> ...`;
+        }
+        try {
+            await fetch(`/api/clients/${id}/${type}`, { method: 'POST' });
+            if(type === 'stop') setTimeout(fetchClients, 500); 
+        } finally {
+            if(btn) {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = type === 'start' ? `<i class="ph ph-play"></i> Ligar` : `<i class="ph ph-stop"></i> Parar`;
+                }, 2000);
+            }
+        }
+    }
+
+    async function deletar(id) {
+        if(confirm('Tem certeza que deseja apagar os dados deste cliente?')) {
+            await fetch(`/api/clients/${id}`, { method: 'DELETE' });
+            fetchClients();
+        }
+    }
+
+    function openLinkInfo(id, type) {
+        const modal = document.getElementById('linksModal');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        const helper = document.getElementById('copyHelper');
+
+        if(type === 'whats') {
+            title.innerText = 'Conectar Bot';
+            const url = `${window.location.origin}/client.html?id=${id}`;
+            body.innerText = 'Mande este link para o dono da empresa. Ele precisará escanear o QR Code para o bot funcionar.';
+            helper.value = url;
+        } else {
+            title.innerText = 'Painel de Vendas';
+            const url = `${window.location.origin}/dashboard.html`;
+            body.innerText = 'Compartilhe este link com o cliente para ele acompanhar as vendas em tempo real.';
+            helper.value = url;
+        }
+
+        modal.classList.remove('hidden');
+        helper.select();
+        try {
+            navigator.clipboard.writeText(helper.value);
+        } catch(e) {
+            console.log('Clipboard fail, manually select');
+        }
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('linksModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none'; // Forçar via style direto para garantir
+    }
+
+    function fillFormWithData(c) {
+        document.getElementById('clientLogin').value = c.login || '';
+        document.getElementById('clientPassword').value = c.password || '';
+        
+        const info = c.companyInfo || {};
+        document.getElementById('companyName').value = info.name || '';
+        
+        const msgs = info.welcomeMessages || [];
+        document.getElementById('welcome1').value = msgs[0] || '';
+        document.getElementById('welcome2').value = msgs[1] || '';
+        document.getElementById('welcome3').value = msgs[2] || '';
+        
+        const advHours = info.operatingHoursAdvanced;
+        if(advHours || info.operatingHours) {
+            document.getElementById('useOperatingHours').checked = true;
+            document.getElementById('weeklySchedule').classList.remove('hidden');
+            if(advHours) {
+                document.getElementById('timeSegSexStart').value = advHours.segsex?.start || '08:00';
+                document.getElementById('timeSegSexEnd').value = advHours.segsex?.end || '18:00';
+                
+                document.getElementById('openSab').checked = !!advHours.sab?.open;
+                document.getElementById('timeSabStart').value = advHours.sab?.start || '08:00';
+                document.getElementById('timeSabEnd').value = advHours.sab?.end || '12:00';
+                
+                document.getElementById('openDom').checked = !!advHours.dom?.open;
+                document.getElementById('timeDomStart').value = advHours.dom?.start || '08:00';
+                document.getElementById('timeDomEnd').value = advHours.dom?.end || '12:00';
+            }
+        } else {
+            document.getElementById('useOperatingHours').checked = false;
+        }
+
+        document.getElementById('msgClosed').value = info.msgClosed || '';
+        document.getElementById('msgClosed').disabled = !document.getElementById('useOperatingHours').checked;
+
+        document.getElementById('deliveryFeeValue').value = info.deliveryFee || '';
+        document.getElementById('minOrder').value = info.minOrder || '';
+        
+        clientNeighborhoods = JSON.parse(JSON.stringify(info.neighborhoods || []));
+        renderNeighborhoods();
+
+        document.getElementById('serviceRegion').value = info.serviceRegion || '';
+        document.getElementById('useAutoRecall').checked = !!info.useAutoRecall;
+        document.getElementById('recallDays').value = info.recallDays || '';
+        document.getElementById('recallDays').disabled = !info.useAutoRecall;
+        
+        document.getElementById('msgInRoute').value = info.msgInRoute || '';
+        document.getElementById('msgDelivered').value = info.msgDelivered || '';
+        
+        document.getElementById('closingMessage').value = info.closingMessage || '';
+
+        document.getElementById('attendantPhone').value = c.attendantPhone || '';
+        document.getElementById('finalMessage').value = c.finalMessage || '';
+        
+        // Pagamentos
+        document.querySelectorAll('#paymentChecks input').forEach(input => {
+            input.checked = (c.paymentMethods || []).includes(input.value);
+        });
+
+        clientProducts = JSON.parse(JSON.stringify(c.products || []));
+        renderProducts();
+    }
+
+    async function editClient(id) {
+        const res = await fetch('/api/clients');
+        const data = await res.json();
+        const c = data[id];
+        if(!c) return;
+
+        editingClientId = id;
+        toggleView('form');
+        
+        document.getElementById('clientId').value = c.id;
+        document.getElementById('clientId').disabled = true; // ID não pode ser editado
+        
+        fillFormWithData(c);
+    }
+    
+    // --- FUNÇÕES DE EXPORTAR / IMPORTAR BACKUP ---
+    function doDownloadJson(obj, filename) {
+        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function exportData(id) {
+        try {
+            const res = await fetch('/api/clients');
+            const data = await res.json();
+            const clientData = data[id];
+            if (!clientData) return;
+            doDownloadJson(clientData, `zapflow_backup_${id}.json`);
+        } catch(e) {
+            alert('Erro ao exportar dados.');
+        }
+    }
+
+    function exportConfigForm() {
+        const payload = getFormPayload();
+        const safeId = payload.id || 'novo_bot';
+        doDownloadJson(payload, `zapflow_rascunho_${safeId}.json`);
+    }
+
+    function importDataFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const c = JSON.parse(e.target.result);
+                document.getElementById('clientId').value = c.id || '';
+                if (!editingClientId) {
+                    document.getElementById('clientId').disabled = false;
+                }
+                fillFormWithData(c);
+                alert('Backup carregado com sucesso no formulário!');
+            } catch(err) {
+                alert('O arquivo selecionado não parece ser um backup válido do ZapFlow.');
+            }
+            event.target.value = ''; // reseta pro onchange disparar novamente
+        };
+        reader.readAsText(file);
+    }
+
+    // Event Listeners para facilitar fechar modais
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // Init
+    fetchClients();
+</script>
+</body>
+</html>

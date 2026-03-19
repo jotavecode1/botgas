@@ -1,0 +1,12 @@
+node_modules
+.wwebjs_auth
+.wwebjs_cache
+*.log
+.env.*
+clients.json
+orders.json
+clients_profiles.json
+.vscode
+.DS_Store
+.gemini
+package-lock.json

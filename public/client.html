@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conexão WhatsApp - ZapGas</title>
+    <!-- Módulo de Geração de QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c152a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; text-align: center; }
+        .card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 420px; border: 1px solid rgba(255,255,255,0.1);}
+        .brand { margin-bottom: 20px; }
+        .brand-logo { width: 50px; height: 50px; background: linear-gradient(135deg, #0072FF, #00C6FF); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; font-size: 24px; box-shadow: 0 4px 10px rgba(0, 114, 255, 0.4); }
+        h1 { margin-top: 15px; color: #e2e8f0; font-size: 22px; }
+        #qr-container { display: flex; justify-content: center; margin: 25px 0; background: white; padding: 25px; border-radius: 12px; min-height: 256px; align-items: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);}
+        #status { font-weight: 500; margin-top: 20px; color: #00C6FF; font-size: 15px;}
+        .success { color: #10b981 !important; font-size: 18px; }
+        .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #0072FF; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="brand">
+        <div class="brand-logo">ZG</div>
+    </div>
+    <h1>Autenticação ZapGas</h1>
+    <p>Siga os passos abaixo para conectar o robô:</p>
+    <ul style="text-align: left; font-size: 14px; color: #a0aec0;">
+       <li>Abra o WhatsApp</li>
+       <li>Toque em Mais Opções/Configurações</li>
+       <li>Toque em Aparelhos Conectados</li>
+       <li>Aponte a câmera para o código abaixo:</li>
+    </ul>
+    
+    <div id="qr-container">
+        <div class="loader" id="loader"></div>
+        <div id="qrcode"></div>
+    </div>
+    
+    <div id="status">Aguardando o sistema iniciar (fale com o suporte se demorar)...</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('id');
+
+    const statusEl = document.getElementById('status');
+    const qrEl = document.getElementById('qrcode');
+    const loader = document.getElementById('loader');
+
+    if(!clientId) {
+        statusEl.innerText = "ERRO: O link está inválido (falta o ID na URL). Peça o link de conexão correto ao administrador.";
+        loader.style.display = 'none';
+    }
+
+    // Quando conecta pede os dados pro servidor se já tiver criado
+    socket.on('connect', () => {
+        socket.emit('requestData', clientId);
+    });
+
+    // Recebe o texto do QRCode em tempo real
+    socket.on('qr', (data) => {
+        if(data.clientId === clientId) {
+            qrEl.innerHTML = ""; // Limpa anterior
+            loader.style.display = 'none';
+            statusEl.innerText = "Pronto! Escaneie o QR Code acima agora.";
+            
+            // Desenha imagem
+            new QRCode(qrEl, {
+                text: data.qr,
+                width: 256,
+                height: 256,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+    });
+
+    // Quando conectar com sucesso
+    socket.on('ready', (data) => {
+        if(data.clientId === clientId) {
+            qrEl.innerHTML = "";
+            loader.style.display = 'none';
+            statusEl.className = "success";
+            statusEl.innerHTML = "Conectado com sucesso!<br><br><span style='font-size:16px;color:#cbd5e0'>O robô está trabalhando por você. Esta página já pode ser fechada.</span>";
+        }
+    });
+
+    socket.on('statusUpdate', (data) => {
+        if(data.clientId === clientId && statusEl.className !== "success") {
+            if(data.status.includes('Conectado')) {
+                // silencia pois será tratado pelo 'ready'
+            } else {
+                statusEl.innerText = data.status;
+                if(data.status.includes('Desconectado') || data.status.includes('Erro')) {
+                     loader.style.display = 'none';
+                     qrEl.innerHTML = "Sistema indisponível no momento. O administrador precisa ligar o bot no Painel Inicial.";
+                     statusEl.style.color = "#fc8181";
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
