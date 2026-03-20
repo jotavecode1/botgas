@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZapGas - Automação p/ Gás e Água</title>
+    <title>ZapGas Automação - Dashboard Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
@@ -232,10 +232,10 @@
         </div>
         <div class="nav-buttons">
             <button id="btnViewList" onclick="toggleView('list')">
-                <i class="ph ph-squares-four"></i> Painel
+                <i class="ph ph-squares-four"></i> Dashboard ZapGas
             </button>
             <button id="btnViewForm" class="btn-outline" onclick="toggleView('form')">
-                <i class="ph ph-plus-circle"></i> Criar Bot
+                <i class="ph ph-plus-circle"></i> ZapGas Automação
             </button>
         </div>
     </div>
@@ -552,6 +552,7 @@ Em breve sairá para entrega 🚚</textarea>
                         <input type="text" placeholder="Nome (Ex: Ultragaz)" value="${b.name}" oninput="updateBrand(${pIndex}, ${bIndex}, 'name', this.value)" required style="flex:2; margin-bottom:5px;">
                         <input type="number" step="0.01" placeholder="Preço" value="${b.price}" oninput="updateBrand(${pIndex}, ${bIndex}, 'price', this.value)" required style="flex:1; margin-bottom:5px;">
                         <input type="text" placeholder="URL da Imagem" value="${b.image || ''}" oninput="updateBrand(${pIndex}, ${bIndex}, 'image', this.value)" style="width:100%; margin-bottom:5px;">
+                        <input type="text" placeholder="Sinônimos da Opção (Ex: azul, 20l, premium)" value="${b.synonyms ? b.synonyms.join(', ') : ''}" oninput="updateBrandSynonyms(${pIndex}, ${bIndex}, this.value)" style="width:100%; margin-bottom:5px; font-size:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:5px; color:white;">
                         <button type="button" class="btn-sm btn-danger btn-icon" onclick="removeBrand(${pIndex}, ${bIndex})"><i class="ph ph-trash"></i></button>
                     </div>
                 `;
@@ -579,6 +580,9 @@ Em breve sairá para entrega 🚚</textarea>
     
     function addBrand(pIdx) { clientProducts[pIdx].brands.push({ name: '', price: '' }); renderProducts(); }
     function updateBrand(pIdx, bIdx, field, val) { clientProducts[pIdx].brands[bIdx][field] = val; }
+    function updateBrandSynonyms(pIdx, bIdx, val) { 
+        clientProducts[pIdx].brands[bIdx].synonyms = val.split(',').map(s => s.trim()).filter(s => s);
+    }
     function removeBrand(pIdx, bIdx) { clientProducts[pIdx].brands.splice(bIdx, 1); renderProducts(); }
 
     // Inicializa com Água e Gás de exemplo

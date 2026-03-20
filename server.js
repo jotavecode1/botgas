@@ -9,6 +9,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+const BASE_URL = process.env.PUBLIC_URL || 'https://botgas-production.up.railway.app';
+
 // --- FUNÇÕES DE SIMILARIDADE E NLP PARA PRODUTOS ---
 function normalizeText(text) {
     if (!text) return '';
@@ -452,6 +454,10 @@ async function handleIdle(client, msg, text, session, config) {
     for (const msgContent of welcomeMsgs) {
         await client.sendMessage(chatId, msgContent);
     }
+
+    // Link para o Menu Digital
+    const storeUrl = `${BASE_URL}/pedido.html?id=${config.id}`;
+    await client.sendMessage(chatId, `Se preferir, você também pode pedir pelo nosso *Menu Digital*: \n${storeUrl} \n\nOu escolha uma opção abaixo:`);
 
     // Verificação de Perfil para Boas-vinda Personalizada
     const profile = (clientsProfiles[config.id] || {})[chatId];
