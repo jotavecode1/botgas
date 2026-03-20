@@ -247,6 +247,7 @@ function startBot(clientId) {
     const client = new Client({
         authStrategy: new LocalAuth({ clientId: clientId }),
         puppeteer: { 
+            executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome-stable',
             args: [
                 '--no-sandbox', 
                 '--disable-setuid-sandbox',
@@ -254,15 +255,10 @@ function startBot(clientId) {
                 '--disable-accelerated-2d-canvas',
                 '--no-first-run',
                 '--no-zygote',
-                '--disable-gpu',
-                '--disable-extensions',
-                '--disable-software-rasterizer'
+                '--single-process',
+                '--disable-gpu'
             ],
-            headless: true
-        },
-        webVersionCache: { 
-            type: 'remote', 
-            remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html' 
+            headless: 'new'
         }
     });
 
