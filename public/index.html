@@ -644,16 +644,25 @@ Em breve sairá para entrega 🚚</textarea>
             const method = editingClientId ? 'PUT' : 'POST';
             const url = editingClientId ? `/api/clients/${editingClientId}` : '/api/clients';
 
-            await fetch(url, {
+            const res = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            alert('Distribuidora salva com sucesso! O robô já pode ser ligado.');
-            toggleView('list');
-            document.getElementById('addClientForm').reset();
-            clientProducts = []; renderProducts();
-        } catch(err) { alert('Erro ao salvar'); console.error(err); }
+
+            if (res.ok) {
+                alert('Distribuidora salva com sucesso! O robô já pode ser ligado.');
+                toggleView('list');
+                document.getElementById('addClientForm').reset();
+                clientProducts = []; renderProducts();
+            } else {
+                const errData = await res.json();
+                alert('Erro ao salvar: ' + (errData.error || 'Erro interno do servidor'));
+            }
+        } catch(err) { 
+            alert('Erro de conexão ou payload muito grande (tente reduzir o tamanho das imagens).'); 
+            console.error(err); 
+        }
     });
 
     // --- WEBSOCKET E LISTA ---

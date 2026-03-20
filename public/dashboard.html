@@ -1308,6 +1308,12 @@
             if (autoEl) payload.useAutoRecall = autoEl.checked;
             if (window.clientPaymentMethods) payload.paymentMethods = clientPaymentMethods;
 
+            if (!currentClientId) {
+                alert('Erro: Sessão de cliente não identificada. Faça login novamente.');
+                logout();
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Salvando...';
 
@@ -1317,15 +1323,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                
                 const result = await res.json();
-                if (result.success) {
-                    status.innerText = ' Configurações salvas com sucesso!';
+                
+                if (res.ok && result.success) {
+                    status.innerText = ' ✅ Configurações salvas com sucesso!';
                     status.style.color = 'var(--success)';
                     status.style.display = 'block';
-                    setTimeout(() => status.style.display = 'none', 3000);
+                    setTimeout(() => status.style.display = 'none', 4000);
+                } else {
+                    status.innerText = ' ❌ ' + (result.error || 'Erro ao salvar as configurações no servidor.');
+                    status.style.color = 'var(--danger)';
+                    status.style.display = 'block';
                 }
             } catch (err) {
-                status.innerText = ' Erro ao salvar configurações.';
+                console.error('Erro no save:', err);
+                status.innerText = ' ❌ Erro de conexão ou tamanho excedido (reduza as imagens).';
                 status.style.color = 'var(--danger)';
                 status.style.display = 'block';
             } finally {
