@@ -397,6 +397,22 @@
                     <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" value="Link de Pagamento"> Link de Pagamento</label>
                 </div>
 
+                <label>Mensagens Automáticas (Status):</label>
+                <div class="grid-form" style="margin-bottom: 20px;">
+                    <div>
+                        <label>Em Preparo:</label>
+                        <textarea id="msgPreparing" rows="2" placeholder="Seu pedido está sendo preparado!"></textarea>
+                    </div>
+                    <div>
+                        <label>Saiu para Entrega:</label>
+                        <textarea id="msgInRoute" rows="2" placeholder="Seu pedido saiu para entrega!"></textarea>
+                    </div>
+                    <div>
+                        <label>Entregue:</label>
+                        <textarea id="msgDelivered" rows="2" placeholder="Pedido entregue! Obrigado."></textarea>
+                    </div>
+                </div>
+
                 <label>Template de Confirmação Final:</label>
                 <textarea id="finalMessage" rows="16">🧾 Pedido #{numero_pedido} confirmado!
 
@@ -624,6 +640,7 @@ Em breve sairá para entrega 🚚</textarea>
                 minOrder: parseFloat(document.getElementById('minOrder').value) || 0,
                 useAutoRecall: document.getElementById('useAutoRecall').checked,
                 recallDays: document.getElementById('recallDays').value,
+                msgPreparing: document.getElementById('msgPreparing').value,
                 msgInRoute: document.getElementById('msgInRoute').value,
                 msgDelivered: document.getElementById('msgDelivered').value,
                 closingMessage: document.getElementById('closingMessage').value
@@ -638,9 +655,9 @@ Em breve sairá para entrega 🚚</textarea>
     // --- FORMULÁRIO DE CADASTRO SUBMIT ---
     document.getElementById('addClientForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const payload = getFormPayload();
-
+        
         try {
+            const payload = getFormPayload();
             const method = editingClientId ? 'PUT' : 'POST';
             const url = editingClientId ? `/api/clients/${editingClientId}` : '/api/clients';
 
