@@ -374,6 +374,7 @@
                             </label>
                             <input type="number" id="recallDays" placeholder="Dias (ex: 15)" style="width:120px; margin:0;" disabled>
                         </div>
+                        <input type="hidden" id="serviceRegion" value="">
                     </div>
                 </div>
 
@@ -844,6 +845,7 @@ Em breve sairá para entrega 🚚</textarea>
         document.getElementById('recallDays').value = info.recallDays || '';
         document.getElementById('recallDays').disabled = !info.useAutoRecall;
         
+        document.getElementById('msgPreparing').value = info.msgPreparing || '';
         document.getElementById('msgInRoute').value = info.msgInRoute || '';
         document.getElementById('msgDelivered').value = info.msgDelivered || '';
         
